@@ -4,10 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace dungeons_and_cards.Models.Contexts;
 
-public class UserContext : DbContext
+public class Context : DbContext
 {
     
-    public UserContext(DbContextOptions<UserContext> options) : base(options)
+    public Context(DbContextOptions<Context> options) : base(options)
     {
         
     }

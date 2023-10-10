@@ -1,4 +1,5 @@
 using dungeons_and_cards.Models.Contexts;
+using dungeons_and_cards.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,12 +12,16 @@ builder.Logging.AddConsole();
 
 builder.Services.AddControllersWithViews();
 
-var app = builder.Build();
 
 //Connect database
-builder.Services.AddDbContext<UserContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
+builder.Services.AddDbContext<Context>(
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//Dependecy Injection 
+
+builder.Services.AddTransient<IUserService, UserService>();
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
