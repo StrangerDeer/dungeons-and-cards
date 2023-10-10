@@ -1,4 +1,5 @@
-﻿using dungeons_and_cards.Models.UserModels;
+﻿using System.Text.Json;
+using dungeons_and_cards.Models.UserModels;
 using dungeons_and_cards.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,7 @@ namespace dungeons_and_cards.Controllers;
 [Produces("application/json")]
 public class UserController : ControllerBase
 {
-    private IUserService _userService;
+    private readonly IUserService _userService;
     
     public UserController(IUserService userService)
     {
@@ -23,7 +24,19 @@ public class UserController : ControllerBase
 
         return Ok(users);
     }
-    
-    //[HttpPost]
-    //public async Task<IActionResult> 
+
+    [HttpPost]
+    public async Task<IActionResult> AddUser([FromBody] JsonElement body)
+    {
+        var jsonObj = body.Deserialize<User>();
+
+        if (jsonObj == null)
+        {
+            return BadRequest("Body is empty");
+        }
+
+        var userId = await _userService.AddNewUser(jsonObj);
+        
+        return Ok(userId);
+    }
 }
