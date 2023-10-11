@@ -1,19 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 namespace dungeons_and_cards.Models.UserModels;
+
 [PrimaryKey(nameof(EmailAddress))]
-public class User
+public class BannedUser
 {
     public Guid UserId { get; set; }
     public string UserName { get; set; }
     public string EmailAddress { get; set; }
-    public DateTime RegistrationDate { get; set; }
+    public DateTime BannedStart { get; set; }
+    public DateTime BannedEnd { get; set; }
 
-    public User(string userName, string emailAddress)
+    public BannedUser(Guid userId, string userName, string emailAddress, DateTime bannedEnd)
     {
-        UserId = Guid.NewGuid();
+        UserId = userId;
         UserName = userName;
         EmailAddress = emailAddress;
-        RegistrationDate = DateTime.Now;
+        BannedEnd = bannedEnd;
+        BannedStart = DateTime.Now;
     }
 }

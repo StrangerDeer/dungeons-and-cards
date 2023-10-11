@@ -5,6 +5,7 @@ namespace dungeons_and_cards.Services;
 public interface IUserService
 {
     Task<List<User>> GetAllUser();
-    Task<Guid> AddNewUser(User newUser);
-    
+    Task<string> AddNewUser(User newUser);
+    Task<Guid> BannedUser(BannedUser bannedUser);
+    Task<List<BannedUser>> GetAllBannedUser();
 }

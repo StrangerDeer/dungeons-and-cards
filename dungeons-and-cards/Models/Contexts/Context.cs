@@ -13,5 +13,6 @@ public class Context : DbContext
     }
     
     public DbSet<User> Users { get; set; }
+    public DbSet<BannedUser> BannedUsers { get; set; }
 
 }

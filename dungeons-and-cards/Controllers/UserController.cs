@@ -36,10 +36,33 @@ public class UserController : ControllerBase
             return BadRequest("Body is empty");
         }
 
-        var userId = await _userService.AddNewUser(jsonObj);
+        var message = await _userService.AddNewUser(jsonObj);
         
-        return Ok(userId);
+        return Ok(message);
     }
 
-    
+    [HttpGet("ban-user")]
+    public async Task<IActionResult> ListAllBannedUser()
+    {
+        List<BannedUser> users = await _userService.GetAllBannedUser();
+
+        return Ok(users);
+    }
+
+    [HttpPost("ban-user")]
+    public async Task<IActionResult> BanUser([FromBody] JsonElement body)
+    {
+        var jsonObj = body.Deserialize<BannedUser>();
+
+        if (jsonObj == null)
+        {
+            return BadRequest("Body is empty");
+        }
+
+        var userId = await _userService.BannedUser(jsonObj);
+
+        return Ok($"User with {userId} is banned");
+    }
+
+
 }
