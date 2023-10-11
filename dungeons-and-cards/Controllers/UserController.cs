@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using dungeons_and_cards.Models.UserModels;
 using dungeons_and_cards.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -39,4 +40,6 @@ public class UserController : ControllerBase
         
         return Ok(userId);
     }
+
+    
 }
