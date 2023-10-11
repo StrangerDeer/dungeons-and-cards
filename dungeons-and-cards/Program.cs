@@ -9,7 +9,6 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 // Add services to the container.
-
 builder.Services.AddControllersWithViews();
 
 
@@ -18,8 +17,11 @@ builder.Services.AddDbContext<Context>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //Dependecy Injection 
-
 builder.Services.AddTransient<IUserService, UserService>();
+
+
+builder.Services.AddMvc();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 

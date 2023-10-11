@@ -6,4 +6,5 @@ public interface IUserService
 {
     Task<List<User>> GetAllUser();
     Task<Guid> AddNewUser(User newUser);
+    
 }
