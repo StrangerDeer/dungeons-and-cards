@@ -19,19 +19,76 @@ public class UserService : IUserService
         return await _context.Users.ToListAsync();
     }
 
-    public async Task<Guid> AddNewUser(User newUser)
+    public async Task<string> AddNewUser(User newUser)
+    {
+        string result;
+        
+        if (checkUserIsBanned(newUser.EmailAddress).Equals(true))
+        {
+            result = "The user is banned"; 
+            return result;
+        }
+
+        if (checkUserIsExist(newUser.EmailAddress).Equals(true))
+        {
+            result = "The user is already exist";
+            return result;
+        }
+            
+        _context.Users.Add(newUser);
+        await _context.SaveChangesAsync();
+
+        result = $"User with {newUser.UserId} is registered";
+            
+        return result;
+        
+       
+    }
+
+    public async Task<Guid> BannedUser(BannedUser bannedUser)
     {
         try
         {
-            _context.Users.Add(newUser);
+            User userForBanned = await _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(bannedUser.EmailAddress));
+            _context.Users.Remove(userForBanned);
+            _context.BannedUsers.Add(bannedUser);
             await _context.SaveChangesAsync();
 
-            return newUser.UserId;
+            return bannedUser.UserId;
+
         }
         catch (Exception e)
         {
             throw e;
         }
-       
+    }
+
+    public async Task<List<BannedUser>> GetAllBannedUser()
+    {
+        return await _context.BannedUsers.ToListAsync();
+    }
+
+    private async Task<bool> checkUserIsBanned(string email)
+    {
+        var user = await _context.BannedUsers.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
+
+        if (user == null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task<bool> checkUserIsExist(string email)
+    {
+        var user = _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
+
+        if (user == null)
+        {
+            return false;
+        }
+
+        return true;
     }
 }
