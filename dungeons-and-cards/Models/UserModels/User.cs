@@ -4,14 +4,14 @@ namespace dungeons_and_cards.Models.UserModels;
 [PrimaryKey(nameof(EmailAddress))]
 public class User
 {
-    public Guid UserId { get; }
+    public Guid UserId { get; set; }
     public string UserName { get; set; }
     public string EmailAddress { get; set; }
-    public DateTime RegistrationDate { get; }
+    public DateTime RegistrationDate { get; set; }
 
     public User(string userName, string emailAddress)
     {
-        UserId = new Guid();
+        UserId = Guid.NewGuid();
         UserName = userName;
         EmailAddress = emailAddress;
         RegistrationDate = DateTime.Now;
