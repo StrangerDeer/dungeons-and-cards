@@ -41,6 +41,25 @@ public class UserController : ControllerBase
         return Ok(message);
     }
 
+    [HttpDelete]
+    public async Task<IActionResult> DeleteUser([FromBody] JsonElement body)
+    {
+        string objEmailKey = "EmailAddress";
+        string emailAddress = "";
+        
+        foreach (var element in body.EnumerateObject())
+        {
+            if (element.NameEquals(objEmailKey))
+            {
+                emailAddress = element.Value.GetString();
+            }
+        }
+
+        await _userService.DeleteUser(emailAddress);
+        
+        return Ok();
+    }
+
     [HttpGet("ban-user")]
     public async Task<IActionResult> ListAllBannedUser()
     {

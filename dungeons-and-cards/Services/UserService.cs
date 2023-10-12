@@ -45,6 +45,24 @@ public class UserService : IUserService
        
     }
 
+    public async Task<string> DeleteUser(string email)
+    {
+        string result;
+        User user = await _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
+
+        if (user == null)
+        {
+            result = "user not found";
+            return result;
+        }
+
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+
+        result = $"{user.UserName} is deleted";
+        return result;
+    }
+
     public async Task<Guid> BannedUser(BannedUser bannedUser)
     {
         try
