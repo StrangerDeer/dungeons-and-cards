@@ -2,13 +2,16 @@
 using System.Text.Json;
 using dungeons_and_cards.Models.UserModels;
 using dungeons_and_cards.Services;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dungeons_and_cards.Controllers;
 
 [ApiController]
+[EnableCors("AllowAngularOrigins")]  
 [Route("api/users")]
 [Produces("application/json")]
+
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
