@@ -2,7 +2,7 @@
 
 namespace dungeons_and_cards.Models.UserModels;
 
-[PrimaryKey(nameof(EmailAddress))]
+[PrimaryKey(nameof(UserName))]
 public class BannedUser
 {
     public Guid UserId { get; set; }

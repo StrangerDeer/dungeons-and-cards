@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 namespace dungeons_and_cards.Models.UserModels;
-[PrimaryKey(nameof(EmailAddress))]
+[PrimaryKey(nameof(UserName))]
 public class User
 {
     public Guid UserId { get; set; }

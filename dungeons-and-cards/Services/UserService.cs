@@ -29,7 +29,7 @@ public class UserService : IUserService
             return result;
         }
 
-        if (await checkUserIsExist(newUser.EmailAddress))
+        if (await checkUserIsExist(newUser.EmailAddress, newUser.UserName))
         {
             result = "The user is already exist";
             return result;
@@ -48,11 +48,11 @@ public class UserService : IUserService
     public async Task<string> DeleteUser(string email)
     {
         string result;
-        User user = await _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
+        User? user = await _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
 
         if (user == null)
         {
-            result = "user not found";
+            result = "User not found";
             return result;
         }
 
@@ -88,7 +88,7 @@ public class UserService : IUserService
 
     private async Task<bool> checkUserIsBanned(string email)
     {
-        var user = await _context.BannedUsers.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email)).ConfigureAwait(true);
+        BannedUser? user = await _context.BannedUsers.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
 
         if (user == null)
         {
@@ -98,15 +98,22 @@ public class UserService : IUserService
         return true;
     }
 
-    private async Task<bool> checkUserIsExist(string email)
+    private async Task<bool> checkUserIsExist(string email, string username)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email)).ConfigureAwait(true);
+        var user = await _context.Users.FirstOrDefaultAsync(user => user.UserName.Equals(username));
 
-        if (user == null)
+        if (user != null)
         {
-            return false;
+            return true;
+        }
+        
+        user =  await _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
+
+        if (user != null)
+        {
+            return true;
         }
 
-        return true;
+        return false;
     }
 }
