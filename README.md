@@ -62,7 +62,9 @@ Dungeons and Cards is my pet project. The concept is a multiplayer card game in 
    ```
 3. Create database in MSSQL with 'dscs' name
 
-4. Run this command in the PowerShell after open the project directory in that
+4. Don't forget update "ConnectionString" in the appsettings.json!
+
+5. Run this command in the PowerShell after open the project directory in that
    ```sh
    dotnet ef migrations add Init
    ```
