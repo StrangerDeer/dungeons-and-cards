@@ -1,19 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 namespace dungeons_and_cards.Models.UserModels;
-[PrimaryKey(nameof(UserName))]
-public class User
+[PrimaryKey(nameof(UserId))]
+public abstract class User : UserM
 {
-    public Guid UserId { get; set; }
-    public string UserName { get; set; }
-    public string EmailAddress { get; set; }
-    public DateTime RegistrationDate { get; set; }
-
-    public User(string userName, string emailAddress)
+    private static Guid Id { get; set; }
+    private static DateTime StartDate { get; set; }
+    public User(string userName, string emailAddress) : base(Id, userName, emailAddress, StartDate)
     {
-        UserId = Guid.NewGuid();
-        UserName = userName;
-        EmailAddress = emailAddress;
-        RegistrationDate = DateTime.Now;
+        Id = Guid.NewGuid();
+        StartDate = DateTime.Now;
     }
+    
 }

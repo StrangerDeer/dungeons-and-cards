@@ -7,12 +7,13 @@ namespace dungeons_and_cards.Models.Contexts;
 public class Context : DbContext
 {
     
+    public DbSet<User>? Users { get; set; }
+    public DbSet<BannedUser>? BannedUsers { get; set; }
+    
     public Context(DbContextOptions<Context> options) : base(options)
     {
         
     }
-    
-    public DbSet<User> Users { get; set; }
-    public DbSet<BannedUser> BannedUsers { get; set; }
 
+    
 }

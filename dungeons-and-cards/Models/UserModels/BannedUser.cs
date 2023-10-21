@@ -2,20 +2,14 @@
 
 namespace dungeons_and_cards.Models.UserModels;
 
-[PrimaryKey(nameof(UserName))]
-public class BannedUser
+[PrimaryKey(nameof(UserId))]
+public class BannedUser : UserM
 {
-    public Guid UserId { get; set; }
-    public string UserName { get; set; }
-    public string EmailAddress { get; set; }
     public DateTime BannedStart { get; set; }
     public DateTime BannedEnd { get; set; }
 
-    public BannedUser(Guid userId, string userName, string emailAddress, DateTime bannedEnd)
+    public BannedUser(Guid id, string username, string email, DateTime registrationDate, DateTime bannedEnd) : base(id, username, email, registrationDate)
     {
-        UserId = userId;
-        UserName = userName;
-        EmailAddress = emailAddress;
         BannedEnd = bannedEnd;
         BannedStart = DateTime.Now;
     }
