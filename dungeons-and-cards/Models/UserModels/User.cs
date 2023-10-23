@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 namespace dungeons_and_cards.Models.UserModels;
-[PrimaryKey(nameof(UserId))]
-public abstract class User : UserM
+public class User : UserM
 {
     private static Guid Id { get; set; }
     private static DateTime StartDate { get; set; }
