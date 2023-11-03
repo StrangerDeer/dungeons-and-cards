@@ -29,7 +29,7 @@ public class UserService : IUserService
             return result;
         }
 
-        if (await checkUserIsExist(newUser.EmailAddress, newUser.UserName))
+        if (await checkUserIsExist(newUser.EmailAddress, newUser.Username))
         {
             result = "The user is already exist";
             return result;
@@ -59,7 +59,7 @@ public class UserService : IUserService
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
 
-        result = $"{user.UserName} is deleted";
+        result = $"{user.Username} is deleted";
         return result;
     }
 
@@ -100,7 +100,7 @@ public class UserService : IUserService
 
     private async Task<bool> checkUserIsExist(string email, string username)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(user => user.UserName.Equals(username));
+        var user = await _context.Users.FirstOrDefaultAsync(user => user.Username.Equals(username));
 
         if (user != null)
         {
