@@ -8,12 +8,12 @@ public class BannedUser : UserM
     public DateTime BannedStart { get; set; }
     public DateTime BannedEnd { get; set; }
 
-    public BannedUser(User user, DateTime bannedEnd)
-        : base(user.UserId, user.Username, BanUserPassword, user.EmailAddress, user.RegistrationDate)
+    public BannedUser(Guid userId, string username, string emailAddress, DateTime registrationDate, DateTime bannedEnd)
+        : base(userId, username, BanUserPassword, emailAddress, registrationDate)
     {
+        BanUserPassword = GenerateRandomPassword();
         BannedStart = DateTime.Now;
         BannedEnd = bannedEnd;
-        BanUserPassword = GenerateRandomPassword();
     }
 
     private static string GenerateRandomPassword()
