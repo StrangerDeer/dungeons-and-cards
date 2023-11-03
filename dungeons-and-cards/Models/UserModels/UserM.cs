@@ -3,6 +3,7 @@
 namespace dungeons_and_cards.Models.UserModels;
 
 [PrimaryKey(nameof(UserId))]
+
 public abstract class UserM
 {
     public Guid UserId { get; set; }

@@ -10,10 +10,14 @@ public class Context : DbContext
     
     public DbSet<User> Users { get; set; }
     public DbSet<BannedUser> BannedUsers { get; set; }
-    
     public Context(DbContextOptions<Context> options) : base(options)
     {
         
     }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>().Property("Password");
+        modelBuilder.Entity<BannedUser>().Property("Password");
+    }
 }

@@ -1,6 +1,5 @@
 ﻿using dungeons_and_cards.Models.Contexts;
 using dungeons_and_cards.Models.UserModels;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace dungeons_and_cards.Services;
