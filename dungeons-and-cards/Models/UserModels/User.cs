@@ -1,29 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 namespace dungeons_and_cards.Models.UserModels;
-public class User : UserM
+public class User : BaseUser
 {
-    private static Guid Id { get; set; }
-    private static DateTime StartDate { get; set; }
-    private static string UserPassword { get; set; }
-    public User(string username, string password, string emailAddress) : base(Id, username, UserPassword, emailAddress, StartDate)
+    public User(string username, string hashPassword, string emailAddress) : base(Guid.NewGuid(), username, hashPassword, emailAddress, DateTime.Now)
     {
-        Id = Guid.NewGuid();
-        StartDate = DateTime.Now;
-        UserPassword = HashPassword(password);
     }
-
-    private string HashPassword(string password)
-    {
-        return BCrypt.Net.BCrypt.EnhancedHashPassword(password);
-    }
+    
     public bool CheckPassword(string password)
     {
-        return BCrypt.Net.BCrypt.EnhancedVerify(password, Password);
+        return BCrypt.Net.BCrypt.EnhancedVerify(password, HashPassword);
     }
-
     public void ChangePassword(string newPassword)
     {
-        Password = BCrypt.Net.BCrypt.EnhancedHashPassword(newPassword);
+        HashPassword = BCrypt.Net.BCrypt.EnhancedHashPassword(newPassword);
     }
 }

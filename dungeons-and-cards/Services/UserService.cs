@@ -25,42 +25,31 @@ public class UserService : IUserService
             newUser.Password.IsNullOrEmpty() ||
             newUser.EmailAddress.IsNullOrEmpty())
         {
-            throw new Exception("Please fill all field");
+            throw new BadRequestException("One of the field is empty");
         }
+
+        await CheckUserIsBannedWithEmail(newUser.EmailAddress);
+        await CheckUserIsExist(newUser.EmailAddress, newUser.Username);
         
-        if (await CheckUserIsBanned(newUser.EmailAddress))
-        {
-            throw new Exception("User is banned!");
-        }
-
-        if (await CheckUserIsExist(newUser.EmailAddress, newUser.Username))
-        {
-            throw new Exception("User is exist");
-        }
-
-        User user = new User(newUser.Username, newUser.Password, newUser.EmailAddress);
+        User user = new User(newUser.Username, HashPassword(newUser.Password), newUser.EmailAddress);
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
             
         return user;
     }
-
-    public async Task<string> DeleteUser(string email)
+    public async Task<User> DeleteUser(User deletedUser)
     {
-        string result;
-        User? user = await _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
+        User? user = await _context.Users.FirstOrDefaultAsync(user => user.Username.Equals(deletedUser.Username));
 
         if (user == null)
         {
-            result = "User not found";
-            return result;
+            throw new BadRequestException($"User with {deletedUser.Username} username is not found");
         }
 
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
 
-        result = $"{user.Username} is deleted";
-        return result;
+        return user;
     }
 
     public async Task<User> Login(UserLogin userLogin)
@@ -68,75 +57,75 @@ public class UserService : IUserService
         if (userLogin.Username.IsNullOrEmpty() ||
             userLogin.Password.IsNullOrEmpty())
         {
-            throw new Exception("One of the field is empty");
+            throw new BadRequestException("One of the field is empty");
         }
 
         User? user = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(userLogin.Username));
 
         if (user == null)
         {
-            throw new Exception("User is not found with this username");
+            throw new BadRequestException("User is not found with this username");
         }
 
         if (!user.CheckPassword(userLogin.Password))
         {
-            throw new Exception("Wrong Password");
+            throw new BadRequestException("Wrong Password");
         }
 
         return user;
     }
 
-    public async Task<Guid> BannedUser(BannedUser bannedUser)
+    public async Task<User> BannedUser(BannedUser bannedUser)
     {
-        try
-        {
-            User userForBanned = await _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(bannedUser.EmailAddress));
-            _context.Users.Remove(userForBanned);
-            _context.BannedUsers.Add(bannedUser);
-            await _context.SaveChangesAsync().ConfigureAwait(true);
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(bannedUser.Username));
 
-            return bannedUser.UserId;
-
-        }
-        catch (Exception e)
+        if (user == null)
         {
-            throw e;
+            throw new BadRequestException($"User with {bannedUser.Username} is not found");
         }
+        
+        _context.Users.Remove(user);
+        _context.BannedUsers.Add(bannedUser);
+        await _context.SaveChangesAsync().ConfigureAwait(true);
+
+        return user;
+
     }
 
     public async Task<List<BannedUser>> GetAllBannedUser()
     {
-        return await _context.BannedUsers.ToListAsync().ConfigureAwait(true);
+        return await _context.BannedUsers.ToListAsync();
     }
 
-    private async Task<bool> CheckUserIsBanned(string email)
+    private static string HashPassword(string password)
+    {
+        return BCrypt.Net.BCrypt.EnhancedHashPassword(password);
+    }
+    
+    private async Task CheckUserIsBannedWithEmail(string email)
     {
         BannedUser? user = await _context.BannedUsers.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
 
-        if (user == null)
+        if (user != null)
         {
-            return false;
+            throw new BadRequestException($"User is banned");
         }
-
-        return true;
     }
 
-    private async Task<bool> CheckUserIsExist(string email, string username)
+    private async Task CheckUserIsExist(string email, string username)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(user => user.Username.Equals(username));
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(username));
 
         if (user != null)
         {
-            return true;
+            throw new BadRequestException("Username is already exist!");
         }
         
-        user =  await _context.Users.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
+        user =  await _context.Users.FirstOrDefaultAsync(u => u.EmailAddress.Equals(email));
 
         if (user != null)
         {
-            return true;
+            throw new BadRequestException($"This e-mail address is already taken");
         }
-
-        return false;
     }
 }

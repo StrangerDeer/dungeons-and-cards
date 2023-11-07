@@ -17,7 +17,7 @@ public class Context : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().Property("Password");
-        modelBuilder.Entity<BannedUser>().Property("Password");
+        modelBuilder.Entity<User>().Property("HashPassword");
+        modelBuilder.Entity<BannedUser>().Property("HashPassword");
     }
 }
