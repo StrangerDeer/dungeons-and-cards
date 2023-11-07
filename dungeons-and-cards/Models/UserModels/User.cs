@@ -10,9 +10,13 @@ public class User : UserM
     {
         Id = Guid.NewGuid();
         StartDate = DateTime.Now;
-        UserPassword = BCrypt.Net.BCrypt.EnhancedHashPassword(password, 13);
+        UserPassword = HashPassword(password);
     }
 
+    private string HashPassword(string password)
+    {
+        return BCrypt.Net.BCrypt.EnhancedHashPassword(password);
+    }
     public bool CheckPassword(string password)
     {
         return BCrypt.Net.BCrypt.EnhancedVerify(password, Password);
@@ -20,6 +24,6 @@ public class User : UserM
 
     public void ChangePassword(string newPassword)
     {
-        Password = BCrypt.Net.BCrypt.EnhancedHashPassword(newPassword, 13);
+        Password = BCrypt.Net.BCrypt.EnhancedHashPassword(newPassword);
     }
 }
