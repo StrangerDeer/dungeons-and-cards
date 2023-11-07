@@ -2,16 +2,14 @@
 
 namespace dungeons_and_cards.Models.UserModels;
 
-public class BannedUser : UserM
+public class BannedUser : BaseUser
 {
-    private static string BanUserPassword { get; set; } = null!;
     public DateTime BannedStart { get; set; }
     public DateTime BannedEnd { get; set; }
 
     public BannedUser(Guid userId, string username, string emailAddress, DateTime registrationDate, DateTime bannedEnd)
-        : base(userId, username, BanUserPassword, emailAddress, registrationDate)
+        : base(userId, username, GenerateRandomPassword(), emailAddress, registrationDate)
     {
-        BanUserPassword = GenerateRandomPassword();
         BannedStart = DateTime.Now;
         BannedEnd = bannedEnd;
     }
