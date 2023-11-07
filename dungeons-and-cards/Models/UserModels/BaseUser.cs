@@ -4,22 +4,21 @@ namespace dungeons_and_cards.Models.UserModels;
 
 [PrimaryKey(nameof(UserId))]
 
-public abstract class UserM
+public abstract class BaseUser
 {
     public Guid UserId { get; set; }
     public string Username { get; set; }
-    protected string Password { get; set; }
+    protected string HashPassword { get; set; }
     public string EmailAddress { get; set; }
     public DateTime RegistrationDate { get; set; }
     
-    protected UserM(Guid userId, string username, string password, string emailAddress, DateTime registrationDate)
+    protected BaseUser(Guid userId, string username, string hashPassword, string emailAddress, DateTime registrationDate)
     {
         UserId = userId;
         Username = username;
-        Password = password;
+        HashPassword = hashPassword;
         EmailAddress = emailAddress;
         RegistrationDate = registrationDate;
     }
-    
     
 }
