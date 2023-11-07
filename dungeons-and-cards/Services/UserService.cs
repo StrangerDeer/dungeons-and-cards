@@ -1,6 +1,7 @@
 ﻿using dungeons_and_cards.Models.Contexts;
 using dungeons_and_cards.Models.UserModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace dungeons_and_cards.Services;
 
@@ -15,33 +16,33 @@ public class UserService : IUserService
     
     public async Task<List<User>> GetAllUser()
     {
-        return await _context.Users.ToListAsync().ConfigureAwait(true);
+        return await _context.Users.ToListAsync();
     }
 
-    public async Task<string> AddNewUser(User newUser)
+    public async Task<User> AddNewUser(RegistrationUserModel newUser)
     {
-        string result;
-        
-        if (await checkUserIsBanned(newUser.EmailAddress))
+        if (newUser.Username.IsNullOrEmpty() ||
+            newUser.Password.IsNullOrEmpty() ||
+            newUser.EmailAddress.IsNullOrEmpty())
         {
-            result = "The user is banned"; 
-            return result;
+            throw new Exception("Please fill all field");
+        }
+        
+        if (await CheckUserIsBanned(newUser.EmailAddress))
+        {
+            throw new Exception("User is banned!");
         }
 
-        if (await checkUserIsExist(newUser.EmailAddress, newUser.Username))
+        if (await CheckUserIsExist(newUser.EmailAddress, newUser.Username))
         {
-            result = "The user is already exist";
-            return result;
+            throw new Exception("User is exist");
         }
-            
-        _context.Users.Add(newUser);
-        await _context.SaveChangesAsync().ConfigureAwait(true);
 
-        result = $"User with {newUser.UserId} is registered";
+        User user = new User(newUser.Username, newUser.Password, newUser.EmailAddress);
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
             
-        return result;
-        
-       
+        return user;
     }
 
     public async Task<string> DeleteUser(string email)
@@ -60,6 +61,29 @@ public class UserService : IUserService
 
         result = $"{user.Username} is deleted";
         return result;
+    }
+
+    public async Task<User> Login(UserLogin userLogin)
+    {
+        if (userLogin.Username.IsNullOrEmpty() ||
+            userLogin.Password.IsNullOrEmpty())
+        {
+            throw new Exception("One of the field is empty");
+        }
+
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(userLogin.Username));
+
+        if (user == null)
+        {
+            throw new Exception("User is not found with this username");
+        }
+
+        if (!user.CheckPassword(userLogin.Password))
+        {
+            throw new Exception("Wrong Password");
+        }
+
+        return user;
     }
 
     public async Task<Guid> BannedUser(BannedUser bannedUser)
@@ -85,7 +109,7 @@ public class UserService : IUserService
         return await _context.BannedUsers.ToListAsync().ConfigureAwait(true);
     }
 
-    private async Task<bool> checkUserIsBanned(string email)
+    private async Task<bool> CheckUserIsBanned(string email)
     {
         BannedUser? user = await _context.BannedUsers.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
 
@@ -97,7 +121,7 @@ public class UserService : IUserService
         return true;
     }
 
-    private async Task<bool> checkUserIsExist(string email, string username)
+    private async Task<bool> CheckUserIsExist(string email, string username)
     {
         var user = await _context.Users.FirstOrDefaultAsync(user => user.Username.Equals(username));
 
