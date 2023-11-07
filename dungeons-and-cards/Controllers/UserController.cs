@@ -20,17 +20,9 @@ public class UserController : ControllerBase
     {
         _userService = userService;
     }
-    
-    [HttpGet]
-    public async Task<IActionResult> GetAllUser()
-    {
-        List<User> users = await _userService.GetAllUser();
-
-        return Ok(users);
-    }
 
     [HttpPost]
-    public async Task<IActionResult> AddUser([FromBody] JsonElement body)
+    public async Task<IActionResult> RegisterUser([FromBody] JsonElement body)
     {
         var jsonObj = body.Deserialize<RegistrationUserModel>();
 
@@ -38,14 +30,15 @@ public class UserController : ControllerBase
         {
             return BadRequest("Body is empty");
         }
-
+        
         try
         {
             var user = await _userService.AddNewUser(jsonObj);
+            string message = $"User is registered with {user.UserId} ID.";
         
-            return Ok($"User is registered with {user.UserId} ID.");
+            return Ok(message);
         }
-        catch (Exception e)
+        catch (BadRequestException e)
         {
             return BadRequest(new {message = e.Message});
         }
@@ -54,20 +47,23 @@ public class UserController : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> DeleteUser([FromBody] JsonElement body)
     {
-        string objEmailKey = "EmailAddress";
-        string emailAddress = "";
-        
-        foreach (var element in body.EnumerateObject())
+        var jsonObj = body.Deserialize<User>();
+
+        if (jsonObj == null)
         {
-            if (element.NameEquals(objEmailKey))
-            {
-                emailAddress = element.Value.GetString();
-            }
+            return BadRequest("Body is empty");
         }
 
-        await _userService.DeleteUser(emailAddress);
-        
-        return Ok();
+        try
+        {
+            User user = await _userService.DeleteUser(jsonObj);
+            string message = $"We sorry to you left the community! {user.Username} is deleted.";
+            return Ok(message);
+        }
+        catch (BadRequestException e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpPost("login")]
@@ -83,13 +79,22 @@ public class UserController : ControllerBase
         try
         {
             User user = await _userService.Login(loginModel);
+            string message = $"Hello {user.Username}";
 
-            return Ok($"Hello {user.Username}");
+            return Ok(message);
         }
-        catch (Exception e)
+        catch (BadRequestException e)
         {
             return BadRequest(e.Message);
         }
+    }
+    
+    [HttpGet("all-user")]
+    public async Task<IActionResult> GetAllUser()
+    {
+        List<User> users = await _userService.GetAllUser();
+
+        return Ok(users);
     }
     
     [HttpGet("ban-user")]
@@ -98,6 +103,7 @@ public class UserController : ControllerBase
         List<BannedUser> users = await _userService.GetAllBannedUser();
 
         return Ok(users);
+        
     }
 
     [HttpPost("ban-user")]
@@ -110,10 +116,16 @@ public class UserController : ControllerBase
             return BadRequest("Body is empty");
         }
 
-        var userId = await _userService.BannedUser(jsonObj);
-
-        return Ok($"User with {userId} is banned");
+        try
+        {
+            User user = await _userService.BannedUser(jsonObj);
+            string message = $"{user.Username} with {user.UserId} ID is banned";
+            
+            return Ok(message);
+        }
+        catch (BadRequestException e)
+        {
+            return BadRequest(e.Message);
+        }
     }
-
-
 }
