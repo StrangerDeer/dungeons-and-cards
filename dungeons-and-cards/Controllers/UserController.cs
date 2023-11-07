@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using dungeons_and_cards.Models.UserModels;
 using dungeons_and_cards.Services;
@@ -9,7 +9,7 @@ namespace dungeons_and_cards.Controllers;
 
 [ApiController]
 [EnableCors("AllowAngularOrigins")]  
-[Route("api/users")]
+[Route("api/user")]
 [Produces("application/json")]
 
 public class UserController : ControllerBase
@@ -20,7 +20,7 @@ public class UserController : ControllerBase
     {
         _userService = userService;
     }
-
+    
     [HttpGet]
     public async Task<IActionResult> GetAllUser()
     {
@@ -32,18 +32,25 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddUser([FromBody] JsonElement body)
     {
-        var jsonObj = body.Deserialize<User>();
+        var jsonObj = body.Deserialize<RegistrationUserModel>();
 
         if (jsonObj == null)
         {
             return BadRequest("Body is empty");
         }
 
-        var message = await _userService.AddNewUser(jsonObj);
+        try
+        {
+            var user = await _userService.AddNewUser(jsonObj);
         
-        return Ok(message);
+            return Ok($"User is registered with {user.UserId} ID.");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(new {message = e.Message});
+        }
     }
-
+    
     [HttpDelete]
     public async Task<IActionResult> DeleteUser([FromBody] JsonElement body)
     {
@@ -63,6 +70,28 @@ public class UserController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginUser([FromBody] JsonElement body)
+    {
+        var loginModel = body.Deserialize<UserLogin>();
+
+        if (loginModel == null)
+        {
+            return BadRequest("Body is empty");
+        }
+
+        try
+        {
+            User user = await _userService.Login(loginModel);
+
+            return Ok($"Hello {user.Username}");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+    
     [HttpGet("ban-user")]
     public async Task<IActionResult> ListAllBannedUser()
     {
