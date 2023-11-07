@@ -1,9 +1,6 @@
 using dungeons_and_cards.Models.Contexts;
 using dungeons_and_cards.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Cors;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +10,6 @@ builder.Logging.AddConsole();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
 
 //Connect database
 builder.Services.AddDbContext<Context>(
@@ -34,7 +30,6 @@ builder.Services.AddCors(options =>
 
 //Dependecy Injection 
 builder.Services.AddTransient<IUserService, UserService>();
-
 
 builder.Services.AddMvc();
 
