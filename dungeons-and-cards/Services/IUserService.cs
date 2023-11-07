@@ -6,8 +6,8 @@ public interface IUserService
 {
     Task<List<User>> GetAllUser();
     Task<User> AddNewUser(RegistrationUserModel newUser);
-    Task<string> DeleteUser(string email);
+    Task<User> DeleteUser(User deletedUser);
     Task<User> Login(UserLogin userLogin);
-    Task<Guid> BannedUser(BannedUser bannedUser);
+    Task<User> BannedUser(BannedUser bannedUser);
     Task<List<BannedUser>> GetAllBannedUser();
 }
