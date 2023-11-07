@@ -5,7 +5,7 @@ public class User : UserM
 {
     private static Guid Id { get; set; }
     private static DateTime StartDate { get; set; }
-    private static string UserPassword { get; set; } = null!;
+    private static string UserPassword { get; set; }
     public User(string username, string password, string emailAddress) : base(Id, username, UserPassword, emailAddress, StartDate)
     {
         Id = Guid.NewGuid();
