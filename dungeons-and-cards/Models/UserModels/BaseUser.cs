@@ -10,14 +10,16 @@ public abstract class BaseUser
     public string Username { get; set; }
     protected string HashPassword { get; set; }
     public string EmailAddress { get; set; }
+    public Role UserRole { get; set; }
     public DateTime RegistrationDate { get; set; }
     
-    protected BaseUser(Guid userId, string username, string hashPassword, string emailAddress, DateTime registrationDate)
+    protected BaseUser(Guid userId, string username, string hashPassword, string emailAddress, Role userRole, DateTime registrationDate)
     {
         UserId = userId;
         Username = username;
         HashPassword = hashPassword;
         EmailAddress = emailAddress;
+        UserRole = userRole;
         RegistrationDate = registrationDate;
     }
     
