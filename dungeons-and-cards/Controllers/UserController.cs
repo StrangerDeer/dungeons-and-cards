@@ -1,26 +1,34 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using dungeons_and_cards.Models.UserModels;
 using dungeons_and_cards.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace dungeons_and_cards.Controllers;
 
 [ApiController]
 [EnableCors("AllowAngularOrigins")]  
+[Authorize]
 [Route("api/user")]
 [Produces("application/json")]
 
 public class UserController : ControllerBase
 {
+    private readonly IConfiguration _configuration;
     private readonly IUserService _userService;
     
-    public UserController(IUserService userService)
+    public UserController(IConfiguration configuration, IUserService userService)
     {
+        _configuration = configuration;
         _userService = userService;
     }
 
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> RegisterUser([FromBody] JsonElement body)
     {
@@ -66,6 +74,7 @@ public class UserController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> LoginUser([FromBody] JsonElement body)
     {
@@ -79,9 +88,9 @@ public class UserController : ControllerBase
         try
         {
             User user = await _userService.Login(loginModel);
-            string message = $"Hello {user.Username}";
-
-            return Ok(message);
+            string token = GenerateToken(user);
+            
+            return Ok(token);
         }
         catch (BadRequestException e)
         {
@@ -89,6 +98,7 @@ public class UserController : ControllerBase
         }
     }
     
+    [Authorize]
     [HttpGet("all-user")]
     public async Task<IActionResult> GetAllUser()
     {
@@ -127,5 +137,30 @@ public class UserController : ControllerBase
         {
             return BadRequest(e.Message);
         }
+    }
+
+    [NonAction]
+    private string GenerateToken(User user)
+    {
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSetting:Key"]!));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
+            new Claim(JwtRegisteredClaimNames.Email, user.EmailAddress),
+            new Claim(ClaimTypes.Role, user.UserRole.ToString()),
+            new Claim("RegistrationDate", user.RegistrationDate.ToString("s"))
+        };
+
+        var token = new JwtSecurityToken(_configuration["JwtSetting:Issuer"],
+            _configuration["JwtSetting:Audience"],
+            claims,
+            expires: DateTime.UtcNow.AddMinutes(1),
+            signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+        
     }
 }
