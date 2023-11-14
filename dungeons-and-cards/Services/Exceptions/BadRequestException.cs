@@ -1,4 +1,4 @@
-﻿namespace dungeons_and_cards.Services;
+﻿namespace dungeons_and_cards.Services.Exceptions;
 
 public class BadRequestException : Exception
 {
