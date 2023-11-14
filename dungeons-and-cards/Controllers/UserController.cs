@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using dungeons_and_cards.Models.UserModels;
 using dungeons_and_cards.Services;
+using dungeons_and_cards.Services.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;

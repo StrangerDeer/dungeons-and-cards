@@ -1,5 +1,7 @@
 ﻿using dungeons_and_cards.Models.Contexts;
 using dungeons_and_cards.Models.UserModels;
+using dungeons_and_cards.Services.Exceptions;
+using dungeons_and_cards.Services.Validators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -21,15 +23,24 @@ public class UserService : IUserService
 
     public async Task<User> AddNewUser(RegistrationUserModel newUser)
     {
-        if (newUser.Username.IsNullOrEmpty() ||
-            newUser.Password.IsNullOrEmpty() ||
-            newUser.EmailAddress.IsNullOrEmpty())
+        List<User> users = await _context.Users.ToListAsync();
+        
+        List<BaseValidator> validators = new List<BaseValidator>
         {
-            throw new BadRequestException("One of the field is empty");
-        }
+            new EmptyStringTypeChecker(),
+            new UsernameExistingChecker(users),
+            new UserEmailExistingChecker(users)
+        };
 
-        await CheckUserIsBannedWithEmail(newUser.EmailAddress);
-        await CheckUserIsExist(newUser.EmailAddress, newUser.Username);
+        foreach (BaseValidator validator in validators)
+        {
+            if (validator.Checker(newUser))
+            {
+                validator.ValidatorMessage();
+            }    
+        }
+        
+        await CheckUserIsBanned(newUser.Username, newUser.EmailAddress);
         
         User user = new User(newUser.Username, HashPassword(newUser.Password), newUser.EmailAddress);
         _context.Users.Add(user);
@@ -93,7 +104,7 @@ public class UserService : IUserService
         return user;
 
     }
-
+    
     public async Task<List<BannedUser>> GetAllBannedUser()
     {
         return await _context.BannedUsers.ToListAsync();
@@ -104,40 +115,25 @@ public class UserService : IUserService
         return BCrypt.Net.BCrypt.EnhancedHashPassword(password);
     }
     
-    private async Task CheckUserIsBannedWithEmail(string email)
+    private async Task CheckUserIsBannedWithUsername(string username)
     {
-        BannedUser? user = await _context.BannedUsers.FirstOrDefaultAsync(user => user.EmailAddress.Equals(email));
+        var user = await _context.BannedUsers.FirstOrDefaultAsync(u => u.Username.Equals(username));
 
         if (user != null)
         {
             throw new BadRequestException($"User is banned for {user.BannedEnd}");
         }
     }
-
-    private async Task CheckUserIsBannedWithUsername(string username)
+    
+    private async Task CheckUserIsBanned(string username, string email)
     {
-        BannedUser? user = await _context.BannedUsers.FirstOrDefaultAsync(u => u.Username.Equals(username));
+        var user = await _context.BannedUsers.FirstOrDefaultAsync(u => u.Username.Equals(username) || u.EmailAddress.Equals(email));
 
         if (user != null)
         {
-            throw new BadRequestException($"User is banned  for {user.BannedEnd}");
+            string message = user.Username.Equals(username) ? "This username is banned" : "This e-mail is banned";
+            throw new BadRequestException(message);
         }
     }
-
-    private async Task CheckUserIsExist(string email, string username)
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(username));
-
-        if (user != null)
-        {
-            throw new BadRequestException("Username is already exist!");
-        }
-        
-        user =  await _context.Users.FirstOrDefaultAsync(u => u.EmailAddress.Equals(email));
-
-        if (user != null)
-        {
-            throw new BadRequestException($"This e-mail address is already taken");
-        }
-    }
+    
 }
