@@ -120,7 +120,7 @@ public class UserService : IUserService
 
         if (user != null)
         {
-            throw new BadRequestException($"User is banned for {user.BannedEnd}");
+            throw new BadRequestException($"User is banned  for {user.BannedEnd}");
         }
     }
 
