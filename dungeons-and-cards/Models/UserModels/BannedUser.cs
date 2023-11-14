@@ -7,8 +7,8 @@ public class BannedUser : BaseUser
     public DateTime BannedStart { get; set; }
     public DateTime BannedEnd { get; set; }
 
-    public BannedUser(Guid userId, string username, string emailAddress, DateTime registrationDate, DateTime bannedEnd)
-        : base(userId, username, GenerateRandomPassword(), emailAddress, registrationDate)
+    public BannedUser(Guid userId, string username, string emailAddress, Role userRole, DateTime registrationDate, DateTime bannedEnd)
+        : base(userId, username, GenerateRandomPassword(), emailAddress, userRole, registrationDate)
     {
         BannedStart = DateTime.Now;
         BannedEnd = bannedEnd;

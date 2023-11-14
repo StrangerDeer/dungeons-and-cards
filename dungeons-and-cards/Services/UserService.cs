@@ -67,6 +67,8 @@ public class UserService : IUserService
             throw new BadRequestException("User is not found with this username");
         }
 
+        await CheckUserIsBannedWithUsername(user.Username);
+
         if (!user.CheckPassword(userLogin.Password))
         {
             throw new BadRequestException("Wrong Password");
@@ -108,7 +110,17 @@ public class UserService : IUserService
 
         if (user != null)
         {
-            throw new BadRequestException($"User is banned");
+            throw new BadRequestException($"User is banned for {user.BannedEnd}");
+        }
+    }
+
+    private async Task CheckUserIsBannedWithUsername(string username)
+    {
+        BannedUser? user = await _context.BannedUsers.FirstOrDefaultAsync(u => u.Username.Equals(username));
+
+        if (user != null)
+        {
+            throw new BadRequestException($"User is banned  for {user.BannedEnd}");
         }
     }
 

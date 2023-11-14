@@ -1,27 +1,55 @@
+using System.Text;
 using dungeons_and_cards.Models.Contexts;
 using dungeons_and_cards.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+var config = builder.Configuration;
+var services = builder.Services;
 
 //Logger
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+services.AddControllersWithViews();
 
 //Connect database
-builder.Services.AddDbContext<Context>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+services.AddDbContext<Context>(
+    options => options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+
+//Authentication && Authorization
+services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = config["JwtSetting:Issuer"],
+        ValidAudience = config["JwtSetting:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSetting:Key"]!)),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true
+        
+    };
+});
+
+services.AddAuthorization();
 
 //Setup cors
-builder.Services.AddCors(options =>
+services.AddCors(options =>
 {
     options.AddPolicy(name: "AllowAngularOrigins",
-        config =>
+        configuration =>
         {
-            config.WithOrigins(" http://localhost:4200")
+            configuration.WithOrigins(" http://localhost:4200")
                 .AllowAnyHeader()
                 .SetIsOriginAllowed((host) => true)
                 .AllowAnyMethod();
@@ -29,11 +57,11 @@ builder.Services.AddCors(options =>
 });
 
 //Dependecy Injection 
-builder.Services.AddTransient<IUserService, UserService>();
+services.AddTransient<IUserService, UserService>();
 
-builder.Services.AddMvc();
+services.AddMvc();
 
-builder.Services.AddControllers();
+services.AddControllers();
 
 
 var app = builder.Build();
@@ -46,11 +74,15 @@ if (!app.Environment.IsDevelopment())
     
 }
 
+
+app.UseAuthentication();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 app.UseCors("AllowAngularOrigins");
+
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

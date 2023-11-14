@@ -3,7 +3,7 @@
 namespace dungeons_and_cards.Models.UserModels;
 public class User : BaseUser
 {
-    public User(string username, string hashPassword, string emailAddress) : base(Guid.NewGuid(), username, hashPassword, emailAddress, DateTime.Now)
+    public User(string username, string hashPassword, string emailAddress) : base(Guid.NewGuid(), username, hashPassword, emailAddress, Role.User, DateTime.Now)
     {
     }
     
